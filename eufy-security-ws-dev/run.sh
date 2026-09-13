@@ -35,18 +35,6 @@ if bashio::config.has_value 'trusted_device_name'; then
     TRUSTED_DEVICE_NAME_JQ="trustedDeviceName: \$trusted_device_name,"
 fi
 
-EUFY_CLIENT_GIT_URL=""
-if bashio::config.has_value 'github_url'; then
-    EUFY_CLIENT_GIT_URL="$(bashio::config 'github_url')"
-fi
-
-EUFY_CLIENT_GIT_BRANCH=""
-if bashio::config.has_value 'github_branch'; then
-    EUFY_CLIENT_GIT_BRANCH="$(bashio::config 'github_branch')"
-fi
-
-EUFY_SECURITY_WS_VERSION="$(bashio::config 'eufy_ws_version')"
-
 STATION_IP_ADDRESSES_ARG=""
 STATION_IP_ADDRESSES_JQ=""
 if bashio::config.has_value 'stations'; then
@@ -61,11 +49,10 @@ if bashio::config.has_value 'stations'; then
             STATION_IP_ADDRESSES_JQ="$STATION_IP_ADDRESSES_JQ, \$${TMP_DATA[0]}"
         fi
     done <<<"$(bashio::config 'stations')"
+
     if [ "$STATION_IP_ADDRESSES_ARG" != "" ]; then
         STATION_IP_ADDRESSES_JQ="$STATION_IP_ADDRESSES_JQ }"
     fi
-    #bashio::log.info "STATION_IP_ADDRESSES_JQ: ${STATION_IP_ADDRESSES_JQ}"
-    #bashio::log.info "STATION_IP_ADDRESSES_ARG: ${STATION_IP_ADDRESSES_ARG}"
 fi
 
 PORT_OPTION=""
@@ -105,39 +92,16 @@ JSON_STRING="$( jq -n \
     }"
   )"
 
-check_version() {
-    if [ "$1" = "$2" ]; then
-        return 1 # equal
-    fi
-    version=$(printf '%s\n' "$1" "$2" | sort -V | tail -n 1)
-    if [ "$version" = "$2" ]; then
-        return 2 # greater
-    fi
-    return 0 # lower
-}
-
-if [ -n "${EUFY_CLIENT_GIT_URL}" ] && [ -n "${EUFY_CLIENT_GIT_BRANCH}" ];  then
-    echo "Installing a git version of Eufy Client $EUFY_CLIENT_GIT_URL with branch $EUFY_CLIENT_GIT_BRANCH"
-    cd /usr/src/app
-    git clone -b "$EUFY_CLIENT_GIT_BRANCH" "$EUFY_CLIENT_GIT_URL"
-
-    cd eufy-security-client
-    npm ci
-    npm run build -y
-    npm pack
-    mv eufy-security-client*.tgz ../eufy-security-client.tgz
-    cd ..
-
-    npm pkg set dependencies.eufy-security-ws="$EUFY_SECURITY_WS_VERSION"
-    npm pkg set overrides.eufy-security-client=file:eufy-security-client.tgz
-    npm install --force
-else
-    npm install --force "eufy-security-ws@${EUFY_SECURITY_WS_VERSION}"
-fi
-
 if bashio::config.has_value 'username' && bashio::config.has_value 'password'; then
-    echo "$JSON_STRING" > $CONFIG_PATH
-    exec /usr/bin/node $IPV4_FIRST_NODE_OPTION /usr/src/app/node_modules/eufy-security-ws/dist/bin/server.js --host 0.0.0.0 --config $CONFIG_PATH $DEBUG_OPTION $PORT_OPTION
+    echo "$JSON_STRING" > "$CONFIG_PATH"
+
+    exec /usr/bin/node \
+        $IPV4_FIRST_NODE_OPTION \
+        /usr/src/app/node_modules/eufy-security-ws/dist/bin/server.js \
+        --host 0.0.0.0 \
+        --config "$CONFIG_PATH" \
+        $DEBUG_OPTION \
+        $PORT_OPTION
 else
     echo "Required parameters username and/or password not set. Starting aborted!"
 fi

@@ -16,6 +16,8 @@ RUN \
 COPY package.json /usr/src/app/
 
 # Install patched eufy-security-client from our fork
+# Build patched eufy-security-client into the image.
+# This avoids rebuilding it on every add-on restart.
 RUN \
     set -x \
     && git clone --depth 1 \

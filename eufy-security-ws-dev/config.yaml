@@ -1,22 +1,23 @@
 name: eufy-security-ws-dev-node24
 description: DEV - Allows you to control Eufy security devices over websocket by connecting to the Eufy cloud servers and local/remote stations
 slug: eufy_security_ws_dev_node24
-version: 3.1.0-3
-url: https://github.com/bropat/hassio-eufy-security-ws
+version: 3.1.0-4
+url: https://github.com/mavoellm/hassio-eufy-security-ws
 init: false
+
 arch:
   - aarch64
   - amd64
   - armhf
   - armv7
   - i386
-#https://github.com/codenotary/cas/issues/296
-#codenotary: patrick.broetto@gmail.com
+
 stage: stable
 host_network: true
 timeout: 30
 startup: services
 boot: auto
+
 options:
   username: null
   password: null
@@ -28,9 +29,7 @@ options:
   ipv4first: false
   event_duration: 10
   stations: []
-  github_url: null
-  github_branch: null
-  eufy_ws_version: "3.1.0"
+
 schema:
   username: email
   password: password
@@ -45,6 +44,3 @@ schema:
   stations:
     - serial_number: str
       ip_address: match(^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$)
-  github_url: str?
-  github_branch: str?
-  eufy_ws_version: str

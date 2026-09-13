@@ -96,7 +96,7 @@ JSON_STRING="$( jq -n \
 if bashio::config.has_value 'username' && bashio::config.has_value 'password'; then
     echo "$JSON_STRING" > $CONFIG_PATH
     # No --security-revert=CVE-2023-46809: Node 24 dropped that revert token and
-    # aborts on startup if it's passed. eufy-security-ws@3.0.1 instead defaults
+    # aborts on startup if it's passed. eufy-security-ws@3.1.0 instead defaults
     # config.enableEmbeddedPKCS1Support=true, so eufy-security-client uses its
     # pure-JS PKCS#1 v1.5 path and the P2P RSA handshake keeps working.
     # See bropat/eufy-security-ws#564.

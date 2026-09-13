@@ -30,7 +30,7 @@ options:
   stations: []
   github_url: null
   github_branch: null
-  eufy_ws_version: "1.9.7"
+  eufy_ws_version: "3.1.0"
 schema:
   username: email
   password: password

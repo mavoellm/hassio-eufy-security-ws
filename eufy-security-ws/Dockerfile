@@ -4,22 +4,39 @@ FROM $BUILD_FROM
 ARG EUFY_SECURITY_WS_VERSION
 
 WORKDIR /usr/src/app
+
 RUN \
     set -x \
-    # The Alpine 3.23 base image (see build.yaml) ships Node.js 24 in its main
-    # repository, so nodejs/npm install directly with no edge-repo workarounds.
     && apk add --no-cache \
-        jq \
         nodejs \
         npm \
-    && node --version \
-    # Fail the build if the base ever regresses below Node 24.
-    && case "$(node --version)" in v24.*) ;; *) echo "Expected Node 24, got $(node --version)" >&2; exit 1 ;; esac \
+        jq \
+        git
+
+COPY package.json /usr/src/app/
+
+# Install patched eufy-security-client from our fork
+RUN \
+    set -x \
+    && git clone --depth 1 \
+        --branch ha-node20-code200-fix \
+        https://github.com/mavoellm/eufy-security-client.git \
+        /tmp/eufy-security-client \
+    && cd /tmp/eufy-security-client \
+    && npm ci \
+    && npm run build -y \
+    && npm pack \
+    && mv eufy-security-client-*.tgz /usr/src/app/eufy-security-client.tgz \
+    && cd /usr/src/app \
+    && npm pkg set dependencies.eufy-security-ws="${EUFY_SECURITY_WS_VERSION}" \
+    && npm pkg set overrides.eufy-security-client="file:eufy-security-client.tgz" \
     && npm install --force \
-    "eufy-security-ws@${EUFY_SECURITY_WS_VERSION}"
+    && rm -rf /tmp/eufy-security-client \
+    && npm cache clean --force
 
 COPY run.sh /
 RUN chmod a+x /run.sh
+
 WORKDIR /data
 
 CMD [ "/run.sh" ]

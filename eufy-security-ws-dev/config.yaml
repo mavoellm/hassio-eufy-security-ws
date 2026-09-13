@@ -1,7 +1,7 @@
-name: eufy-security-ws-dev
+name: eufy-security-ws-dev-node24
 description: DEV - Allows you to control Eufy security devices over websocket by connecting to the Eufy cloud servers and local/remote stations
-version: 3.1.0-1
-slug: "eufy_security_ws_dev"
+slug: eufy_security_ws_dev_node24
+version: 3.1.0-2
 url: https://github.com/bropat/hassio-eufy-security-ws
 init: false
 arch:
